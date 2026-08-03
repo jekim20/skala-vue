@@ -1,0 +1,18 @@
+# dependencies / build output
+node_modules
+dist
+dist-ssr
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# vite
+*.timestamp-*-*.mjs
