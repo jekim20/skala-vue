@@ -48,7 +48,6 @@ Mock 데이터는 전국 18개 도시로 확장했습니다.
 
 ## 배포 방법
 
-
 ```bash
 npm run build          # vite.config.js의 base: '/0803_vue_-/' 적용
 # dist/ 를 gh-pages 브랜치로 push → GitHub Pages가 자동 서빙
