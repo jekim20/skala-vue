@@ -12,6 +12,18 @@ npm install
 npm run dev:all
 ```
 
+### GitHub Pages 실시간 날씨
+
+저장소의 `Settings → Secrets and variables → Actions`에서 다음 Secret을 등록합니다.
+
+```text
+Name: OPENWEATHER_API_KEY
+Value: 채점용 OpenWeather API 키
+```
+
+GitHub Actions가 이를 `VITE_OPENWEATHER_API_KEY`로 빌드에 주입합니다. 프런트 배포 특성상
+브라우저에서 키를 확인할 수 있으므로 채점 전용 키를 사용하고 채점 완료 후 폐기해야 합니다.
+
 ### OpenWeather 실시간 날씨
 
 API 키는 Vue 코드나 `VITE_` 환경변수에 넣지 않고 로컬 API 서버에만 전달합니다.
