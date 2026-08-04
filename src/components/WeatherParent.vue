@@ -1,12 +1,13 @@
 <script setup>
-import { ref, computed, watch, watchEffect, provide } from 'vue'
+import { ref, computed, watch, watchEffect, provide, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import BaseDashboardCard from './BaseDashboardCard.vue'
 import SearchBar from './SearchBar.vue'
 import WeatherCard from './WeatherCard.vue'
 import WeatherStats from './WeatherStats.vue'
-import CityForm from './CityForm.vue'
 import UnitToggle from './UnitToggle.vue'
+import { useConfigStore } from '../stores/configStore.js'
 // ========================================
 // 추가 코드: 지도 컴포넌트
 // ========================================
@@ -15,10 +16,34 @@ import CityMap from './CityMap.vue'
 import BaseballPanel from './BaseballPanel.vue'
 import { countRainOutRisk } from '../utils/baseball'
 import { STATUS_OPTIONS, statusEmoji } from '../utils/weather'
+import { weatherApi } from '../api/labApi.js'
+
+const savedCitiesKey = 'weather-dashboard-saved-cities'
+
+const readSavedCities = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(savedCitiesKey) || '[]')
+    return Array.isArray(saved) ? saved : []
+  } catch {
+    return []
+  }
+}
+
+const writeSavedCities = (cities) => {
+  localStorage.setItem(savedCitiesKey, JSON.stringify(cities))
+}
 
 // ── 모든 반응형 데이터는 부모(WeatherParent)가 단일 소유한다 ──
 const searchQuery = ref('')
 const selectedCityInfo = ref('지역별 날씨 카드를 클릭해 보세요.')
+const isWeatherLoading = ref(false)
+const weatherSource = ref('mock')
+const weatherError = ref('')
+const isCitySearching = ref(false)
+const isStaticDemo = import.meta.env.PROD
+const savedSearchCities = ref(readSavedCities().map((city) => ({ ...city, isSaved: true })))
+const stadiumWeatherList = ref([])
+const stadiumWeatherSource = ref('mock')
 // ========================================
 // 수정 코드: 지도 마커 표시를 위해 기존 도시 데이터에 lat(위도), lng(경도) 추가
 // ========================================
@@ -57,16 +82,69 @@ const recentCities = computed(() =>
 // 추가 코드 끝
 // ========================================
 
-// ── 단위 상태: provide/inject로 후손(WeatherCard, WeatherStats, UnitToggle)에 전파 ──
-const unit = ref('celsius')
-const unitSymbol = computed(() => (unit.value === 'celsius' ? '℃' : '℉'))
-const toggleUnit = () => {
-  unit.value = unit.value === 'celsius' ? 'fahrenheit' : 'celsius'
-}
-const convertTemp = (temp) =>
-  unit.value === 'fahrenheit' ? Math.round((temp * 9) / 5 + 32) : Math.round(temp)
+// Pinia 설정 Store의 단위를 기존 하위 날씨 컴포넌트에도 전달한다.
+const configStore = useConfigStore()
+const { unit, unitSymbol } = storeToRefs(configStore)
+const convertTemp = (temp) => configStore.convertTemperature(temp)
+provide('weather-unit', { unit, unitSymbol, convertTemp, toggleUnit: configStore.toggleUnit })
 
-provide('weather-unit', { unit, unitSymbol, convertTemp, toggleUnit })
+const loadWeather = async () => {
+  isWeatherLoading.value = true
+  weatherError.value = ''
+  try {
+    const [result, stadiumResult] = await Promise.all([
+      weatherApi.getAll(),
+      weatherApi.getStadiums(),
+    ])
+    const savedCities = savedSearchCities.value
+    const savedById = new Map(savedCities.map((city) => [city.id, city]))
+    const baseIds = new Set(result.cities.map(({ id }) => id))
+    weatherList.value = [
+      ...result.cities.map((city) => savedById.has(city.id) ? { ...city, isSaved: true } : city),
+      ...savedCities.filter(({ id }) => !baseIds.has(id)).map((city) => ({ ...city, isSaved: true })),
+    ]
+    weatherSource.value = result.source
+    stadiumWeatherList.value = stadiumResult.stadiums
+    stadiumWeatherSource.value = stadiumResult.source
+    selectedCityInfo.value = result.source === 'openweather'
+      ? '🌐 OpenWeather에서 최신 관측 날씨를 불러왔습니다.'
+      : isStaticDemo
+        ? '✨ GitHub Pages 포트폴리오용 데모 날씨를 표시합니다.'
+        : '🧪 API 키 또는 인터넷 연결이 없어 로컬 Mock 날씨를 사용합니다.'
+  } catch (error) {
+    weatherError.value = error.message
+    selectedCityInfo.value = `⚠️ ${error.message}`
+  } finally {
+    isWeatherLoading.value = false
+  }
+}
+
+const searchWeather = async (query) => {
+  isCitySearching.value = true
+  weatherError.value = ''
+  try {
+    const city = { ...await weatherApi.search(query), isSaved: true }
+    const existingIndex = weatherList.value.findIndex((item) => item.id === city.id)
+    if (existingIndex >= 0) weatherList.value.splice(existingIndex, 1, city)
+    else weatherList.value.push(city)
+    const savedIndex = savedSearchCities.value.findIndex((item) => item.id === city.id)
+    if (savedIndex >= 0) savedSearchCities.value.splice(savedIndex, 1, city)
+    else savedSearchCities.value.push(city)
+    writeSavedCities(savedSearchCities.value)
+    selectCity(city)
+    searchQuery.value = ''
+    statusFilter.value = '전체'
+    weatherSource.value = city.source === 'openweather' ? 'openweather' : 'mock'
+    selectedCityInfo.value = `💾 ${city.name} 날씨를 지역별 날씨 현황에 저장했습니다.`
+  } catch (error) {
+    weatherError.value = error.message
+    selectedCityInfo.value = `⚠️ ${error.message}`
+  } finally {
+    isCitySearching.value = false
+  }
+}
+
+onMounted(loadWeather)
 
 // ── 정렬 / 상태 필터 ──────────────────────────────────────────
 const sortKey = ref('default')
@@ -142,6 +220,8 @@ const addCity = (payload) => {
 
 const removeCity = (cityItem) => {
   weatherList.value = weatherList.value.filter((item) => item.id !== cityItem.id)
+  savedSearchCities.value = savedSearchCities.value.filter((item) => item.id !== cityItem.id)
+  writeSavedCities(savedSearchCities.value)
   // ========================================
   // 추가 코드: 선택된 도시를 삭제하면 전체 지도 상태로 복귀
   // ========================================
@@ -154,7 +234,7 @@ const removeCity = (cityItem) => {
 // ⚾ [추가] ──────────────────────────────────────────────────
 // 날씨 데이터에서 우천 취소 위험 경기 수를 파생 (computed)
 // weatherList가 바뀌면 배지 문구가 자동으로 갱신된다.
-const rainOutCount = computed(() => countRainOutRisk(weatherList.value))
+const rainOutCount = computed(() => countRainOutRisk(stadiumWeatherList.value))
 
 // 경기 카드 클릭(emit) 수신 → 하단 상태바 갱신
 const selectGame = (game) => {
@@ -164,7 +244,6 @@ const selectGame = (game) => {
 
 <template>
   <div class="weather-parent">
-    <!-- Named Slot(#extra)으로 단위 토글을 제목 오른쪽에 배치 -->
     <BaseDashboardCard title="📊 오늘의 요약">
       <template #extra>
         <UnitToggle />
@@ -172,7 +251,12 @@ const selectGame = (game) => {
       <WeatherStats :city-list="weatherList" />
     </BaseDashboardCard>
 
-    <BaseDashboardCard title="🔍 도시 검색 · 추가">
+    <BaseDashboardCard :title="isStaticDemo ? '🔍 도시 날씨 검색' : '🔍 실시간 도시 날씨 검색'">
+      <template #extra>
+        <button class="refresh-button" type="button" :disabled="isWeatherLoading" @click="loadWeather">
+          {{ isWeatherLoading ? '불러오는 중…' : '날씨 새로고침' }}
+        </button>
+      </template>
       <!-- ========================================
            수정 코드: 자동완성용 도시 목록과 최근 도시 전달, 도시 선택 이벤트 추가
            ======================================== -->
@@ -180,11 +264,15 @@ const selectGame = (game) => {
         :search-query="searchQuery"
         :city-list="weatherList"
         :recent-cities="recentCities"
+        :is-searching="isCitySearching"
         @update-query="updateQuery"
         @select-city="selectFromSearch"
+        @search-city="searchWeather"
       />
-      <hr class="divider" />
-      <CityForm @add-city="addCity" />
+      <p class="api-source" :class="{ live: weatherSource === 'openweather' }">
+        {{ weatherSource === 'openweather' ? '● OpenWeather 실시간 데이터' : '● 포트폴리오 데모 데이터' }}
+      </p>
+      <p v-if="weatherError" class="api-error">{{ weatherError }}</p>
     </BaseDashboardCard>
 
     <!-- ========================================
@@ -220,6 +308,7 @@ const selectGame = (game) => {
             <option value="temp-asc">온도 낮은 순</option>
             <option value="name">이름 순</option>
           </select>
+          <span class="saved-count">💾 저장 도시 {{ savedSearchCities.length }}개</span>
         </div>
       </template>
 
@@ -251,13 +340,16 @@ const selectGame = (game) => {
     <BaseDashboardCard title="⚾ 오늘의 KBO 경기 · 우천 취소 예보">
       <!-- #extra 슬롯: 위험 경기 수 요약 배지 (클래스 바인딩으로 색 전환) -->
       <template #extra>
+        <span class="stadium-source" :class="{ live: stadiumWeatherSource === 'openweather' }">
+          {{ stadiumWeatherSource === 'openweather' ? '● 구장 실시간 관측' : '● 구장 데모 날씨' }}
+        </span>
         <span class="risk-badge" :class="{ danger: rainOutCount > 0 }">
           {{ rainOutCount > 0 ? `⚠️ 취소 위험 ${rainOutCount}경기` : '✅ 전 경기 정상 예상' }}
         </span>
       </template>
 
       <!-- props로 날씨 목록을 내려주고, 경기 선택 이벤트를 emit으로 받는다 -->
-      <BaseballPanel :weather-list="weatherList" @select-game="selectGame" />
+      <BaseballPanel :weather-list="stadiumWeatherList" @select-game="selectGame" />
     </BaseDashboardCard>
 
   </div>
@@ -269,6 +361,20 @@ const selectGame = (game) => {
   border: none;
   border-top: 1px dashed #dde3ea;
 }
+
+.refresh-button {
+  padding: 7px 13px;
+  border: 1px solid #42b883;
+  border-radius: 9px;
+  background: #fff;
+  color: #278864;
+  cursor: pointer;
+}
+
+.refresh-button:disabled { cursor: wait; opacity: 0.6; }
+.api-source { margin: 12px 0 0; color: #8995a2; font-size: 0.82rem; }
+.api-source.live { color: #20865f; }
+.api-error { color: #b73c48; font-size: 0.86rem; }
 
 .list-controls {
   display: flex;
@@ -312,6 +418,15 @@ const selectGame = (game) => {
   color: #56687a;
 }
 
+.saved-count {
+  padding: 5px 10px;
+  border-radius: 14px;
+  background: #edf9f4;
+  color: #278864;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .card-list {
   display: flex;
   gap: 12px;
@@ -343,6 +458,9 @@ const selectGame = (game) => {
   font-size: 0.85rem;
   font-weight: bold;
 }
+
+.stadium-source { color: #8995a2; font-size: 0.8rem; }
+.stadium-source.live { color: #20865f; }
 
 .risk-badge.danger {
   background-color: #fdeaea;

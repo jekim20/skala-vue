@@ -5,6 +5,8 @@
       <nav>
         <RouterLink to="/">홈</RouterLink>
         <RouterLink to="/about">서비스 소개</RouterLink>
+        <RouterLink v-if="!isStaticDemo" to="/mock-api">Mock API</RouterLink>
+        <RouterLink v-if="!isStaticDemo" to="/login">JWT 실습</RouterLink>
       </nav>
     </header>
     <main>
@@ -12,6 +14,10 @@
     </main>
   </div>
 </template>
+
+<script setup>
+const isStaticDemo = import.meta.env.PROD
+</script>
 
 <style scoped>
 header {
@@ -31,7 +37,12 @@ header > a {
 
 nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
+}
+
+@media (max-width: 640px) {
+  header { align-items: flex-start; flex-direction: column; }
 }
 
 nav a {

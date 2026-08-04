@@ -62,6 +62,7 @@ const statusClass = computed(() => {
     </button>
 
     <p class="card-emoji">{{ statusEmoji(cityItem.status) }}</p>
+    <span v-if="cityItem.isSaved" class="saved-label">저장됨</span>
     <h4>{{ cityItem.name }}</h4>
     <p class="temp-line">{{ convertTemp(cityItem.temp) }}{{ unitSymbol }} · {{ cityItem.status }}</p>
 
@@ -104,6 +105,16 @@ const statusClass = computed(() => {
 .weather-card.selected {
   border-color: #42b883;
   box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.18);
+}
+
+.saved-label {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #dff5eb;
+  color: #247a58;
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 /* ========================================
    추가 코드 끝

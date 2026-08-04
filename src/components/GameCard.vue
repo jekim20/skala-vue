@@ -36,7 +36,8 @@ const tip = computed(() => getWatchTip(props.weather))
       <p class="venue">🏟️ {{ game.stadium }} · {{ game.time }}</p>
 
       <p class="weather-line" v-if="weather">
-        {{ game.city }} · {{ convertTemp(weather.temp) }}{{ unitSymbol }} · {{ weather.status }}
+        {{ convertTemp(weather.temp) }}{{ unitSymbol }} · {{ weather.status }}
+        <span v-if="weather.humidity != null"> · 습도 {{ weather.humidity }}%</span>
       </p>
       <p class="weather-line muted" v-else>{{ game.city }} 날씨 정보 없음</p>
 
@@ -50,6 +51,9 @@ const tip = computed(() => getWatchTip(props.weather))
       </p>
 
       <p class="tip">{{ tip }}</p>
+      <p v-if="weather" class="observed-source">
+        {{ weather.source === 'openweather' ? 'OpenWeather 구장 좌표 관측' : '포트폴리오 데모 구장 날씨' }}
+      </p>
     </div>
   </div>
 </template>
@@ -117,6 +121,8 @@ const tip = computed(() => getWatchTip(props.weather))
   color: #6b7b8c;
   text-align: center;
 }
+
+.observed-source { margin: 8px 0 0; color: #91a0ad; font-size: 0.7rem; text-align: center; }
 
 /* 판정별 색상 — 클래스 바인딩 */
 .is-normal .status-badge {

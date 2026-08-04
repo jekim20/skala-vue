@@ -1,0 +1,11 @@
+<script setup>
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth.js'
+const auth = useAuthStore(); const router = useRouter()
+async function logout() { auth.logout(); await router.replace('/login') }
+onMounted(async () => { if (!await auth.verify()) await router.replace('/login') })
+</script>
+<template><section class="dash"><div class="dash-hero"><div><span>인증 성공</span><h1>{{ auth.user?.name }}님, 반갑습니다.</h1><p>JWT와 Pinia에 저장된 인증 상태를 확인할 수 있습니다.</p></div><button @click="logout">로그아웃</button></div><div class="dash-grid"><article><b>GET · /api/auth/me</b><h2>사용자 프로필</h2><dl><div><dt>이름</dt><dd>{{ auth.user?.name }}</dd></div><div><dt>이메일</dt><dd>{{ auth.user?.email }}</dd></div><div><dt>권한</dt><dd>{{ auth.user?.role }}</dd></div><div><dt>소속</dt><dd>{{ auth.user?.department }}</dd></div></dl></article><article><b>JWT</b><h2>Access Token</h2><code>{{ auth.accessToken }}</code><p>Payload에는 비밀번호 같은 비밀정보를 넣지 마세요.</p></article><article><b>GET · 보호 API</b><h2>인증 요청 확인</h2><button class="primary" @click="auth.fetchProtectedMessage">보호 API 요청하기</button><p v-if="auth.errorMessage" class="error">{{ auth.errorMessage }}</p><pre v-if="auth.protectedMessage">{{ auth.protectedMessage }}</pre></article></div></section></template>
+<style scoped>.dash-hero{display:flex;justify-content:space-between;gap:20px;padding:30px;border-radius:20px;background:linear-gradient(135deg,#12304a,#0b7666);color:#fff}.dash-hero span{color:#71e0c4}.dash-hero button,.primary{align-self:center;padding:11px 16px;border:0;border-radius:9px;cursor:pointer}.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}.dash-grid article{padding:22px;border:1px solid #dce6ed;border-radius:15px;background:#fff}.dash-grid article:last-child{grid-column:1/-1}.dash-grid b{color:#0d8a72}.dash-grid dl>div{display:flex;justify-content:space-between;border-bottom:1px solid #edf1f4;padding:10px 0}.dash-grid code{display:block;overflow-wrap:anywhere;padding:14px;background:#152b3b;color:#c9f8e9;border-radius:9px}.primary{background:#0d8a72;color:#fff}.error{color:#c03543}pre{white-space:pre-wrap;padding:13px;background:#eef8f5;border-radius:9px}@media(max-width:720px){.dash-hero{flex-direction:column}.dash-grid{grid-template-columns:1fr}.dash-grid article:last-child{grid-column:auto}}
+</style>

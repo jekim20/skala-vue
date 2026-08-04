@@ -21,9 +21,13 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  isSearching: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['update-query', 'select-city'])
+const emit = defineEmits(['update-query', 'select-city', 'search-city'])
 
 // ========================================
 // 추가 코드: 검색 자동완성 상태 및 검색 결과 계산
@@ -44,6 +48,11 @@ const chooseCity = (city) => {
   emit('select-city', city)
   focused.value = false
 }
+
+const submitSearch = () => {
+  const query = props.searchQuery.trim()
+  if (query) emit('search-city', query)
+}
 // ========================================
 // 추가 코드 끝
 // ========================================
@@ -55,7 +64,7 @@ const chooseCity = (city) => {
          수정 코드: 기존 단순 입력창을 자동완성 검색창으로 변경
          ======================================== -->
     <label for="city-search">도시 검색</label>
-    <div class="search-field">
+    <form class="search-field" @submit.prevent="submitSearch">
       <span aria-hidden="true">🔎</span>
       <input
         id="city-search"
@@ -66,6 +75,9 @@ const chooseCity = (city) => {
         @blur="focused = false"
         @input="handleInput"
       />
+      <button class="search-button" type="submit" :disabled="isSearching">
+        {{ isSearching ? '검색 중…' : '날씨 검색' }}
+      </button>
       <ul v-if="focused && suggestions.length" class="suggestions">
         <li v-for="city in suggestions" :key="city.id">
           <button type="button" @mousedown.prevent="chooseCity(city)">
@@ -74,7 +86,7 @@ const chooseCity = (city) => {
           </button>
         </li>
       </ul>
-    </div>
+    </form>
 
     <!-- ========================================
          병합 복원: "입력한 도시명 출력"은 과제 필수 요구사항(단계 1)이므로 유지
@@ -109,11 +121,14 @@ const chooseCity = (city) => {
 .search-field { position: relative; display: flex; align-items: center; }
 .search-field > span { position: absolute; left: 11px; z-index: 1; }
 .search-bar input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 10px 12px 10px 38px;
   border: 1px solid #bbb;
   border-radius: 9px;
 }
+.search-button { flex: 0 0 auto; margin-left: 8px; padding: 10px 14px; border: 0; border-radius: 9px; background: #42b883; color: white; font-weight: 700; cursor: pointer; }
+.search-button:disabled { cursor: wait; opacity: .65; }
 
 .search-bar input:focus {
   outline: none;

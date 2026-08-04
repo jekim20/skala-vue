@@ -15,7 +15,7 @@ const riskOnly = ref(false)
 const gamesWithWeather = computed(() =>
   GAME_SCHEDULE.map((game) => ({
     game,
-    weather: props.weatherList.find((w) => w.name === game.city) ?? null,
+    weather: props.weatherList.find((weather) => weather.gameId === game.id) ?? null,
   })),
 )
 

@@ -1,32 +1,27 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useConfigStore } from '../stores/configStore.js'
+import { weatherApi } from '../api/labApi.js'
 
 const route = useRoute()
 const router = useRouter()
+const configStore = useConfigStore()
 const cityId = route.params.cityId
 const city = ref(null)
 const error = ref('')
 
-const cityMockData = [
-  { id: 'city_01', name: '서울', temp: 28, status: '맑음', humidity: '45%', wind: '3m/s', pressure: '1012hPa', description: '쾌청한 날씨입니다. 야외 활동하기 좋습니다.' },
-  { id: 'city_02', name: '수원', temp: 24, status: '비', humidity: '82%', wind: '5m/s', pressure: '1008hPa', description: '비가 오고 있습니다. 우산을 챙기세요.' },
-  { id: 'city_03', name: '부산', temp: 26, status: '구름', humidity: '68%', wind: '4m/s', pressure: '1010hPa', description: '구름이 많지만 크게 불편하지 않은 날씨입니다.' },
-  { id: 'city_04', name: '인천', temp: 23, status: '흐림', humidity: '74%', wind: '4m/s', pressure: '1009hPa', description: '흐린 하늘이 지속되고 있습니다.' },
-  { id: 'city_05', name: '대전', temp: 27, status: '맑음', humidity: '50%', wind: '3m/s', pressure: '1013hPa', description: '화창하고 기분 좋은 날씨입니다.' },
-  { id: 'city_06', name: '대구', temp: 31, status: '맑음', humidity: '40%', wind: '2m/s', pressure: '1015hPa', description: '무더운 날씨가 이어집니다. 수분 섭취에 유의하세요.' },
-  { id: 'city_07', name: '광주', temp: 22, status: '흐림', humidity: '70%', wind: '4m/s', pressure: '1007hPa', description: '선선하고 흐린 날씨입니다.' },
-  { id: 'city_08', name: '울산', temp: 29, status: '구름', humidity: '64%', wind: '4m/s', pressure: '1011hPa', description: '구름이 끼어 덥지 않은 날씨입니다.' },
-  { id: 'city_09', name: '제주', temp: 20, status: '비', humidity: '88%', wind: '6m/s', pressure: '1006hPa', description: '비가 내리고 있어 우산이 필요합니다.' },
-  { id: 'city_10', name: '강릉', temp: 25, status: '맑음', humidity: '55%', wind: '3m/s', pressure: '1012hPa', description: '해변에 가기 좋은 맑은 날씨입니다.' },
-]
-
-onMounted(() => {
-  const found = cityMockData.find((item) => item.id === cityId)
-  if (found) {
-    city.value = found
-  } else {
-    error.value = '해당 도시를 찾을 수 없습니다. 올바른 도시 ID를 입력했는지 확인하세요.'
+onMounted(async () => {
+  try {
+    city.value = await weatherApi.getById(cityId)
+  } catch (requestError) {
+    try {
+      const savedCities = JSON.parse(localStorage.getItem('weather-dashboard-saved-cities') || '[]')
+      city.value = savedCities.find((item) => item.id === cityId) || null
+    } catch {
+      city.value = null
+    }
+    if (!city.value) error.value = requestError.message
   }
 })
 </script>
@@ -45,10 +40,10 @@ onMounted(() => {
       <p class="city-id">도시 코드: {{ city.id }}</p>
       <ul>
         <li><strong>날씨:</strong> {{ city.status }}</li>
-        <li><strong>기온:</strong> {{ city.temp }}℃</li>
-        <li><strong>습도:</strong> {{ city.humidity }}</li>
-        <li><strong>풍속:</strong> {{ city.wind }}</li>
-        <li><strong>기압:</strong> {{ city.pressure }}</li>
+        <li><strong>기온:</strong> {{ configStore.convertTemperature(city.temp) }}{{ configStore.unitSymbol }}</li>
+        <li><strong>습도:</strong> {{ city.humidity == null ? 'Mock 데이터 없음' : `${city.humidity}%` }}</li>
+        <li><strong>풍속:</strong> {{ city.wind == null ? 'Mock 데이터 없음' : `${city.wind}m/s` }}</li>
+        <li><strong>기압:</strong> {{ city.pressure == null ? 'Mock 데이터 없음' : `${city.pressure}hPa` }}</li>
       </ul>
       <p class="description">{{ city.description }}</p>
     </div>

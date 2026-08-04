@@ -1,13 +1,13 @@
 <script setup>
-import { inject } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useConfigStore } from '../stores/configStore.js'
 
-// 부모(WeatherParent)가 provide한 단위 상태를 inject로 받아 사용한다.
-// props 단계를 거치지 않고 조상 → 후손으로 직접 전달되는 것이 포인트.
-const { unit, unitSymbol, toggleUnit } = inject('weather-unit')
+const configStore = useConfigStore()
+const { unit, unitSymbol } = storeToRefs(configStore)
 </script>
 
 <template>
-  <button class="unit-toggle" type="button" @click="toggleUnit">
+  <button class="unit-toggle" type="button" aria-label="날씨 온도 단위 변경" @click="configStore.toggleUnit">
     <strong>{{ unitSymbol }}</strong>
     <span class="next">{{ unit === 'celsius' ? '℉로 보기' : '℃로 보기' }}</span>
   </button>

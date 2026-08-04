@@ -76,6 +76,6 @@ export const getWatchTip = (weather) => {
 export const countRainOutRisk = (weatherList) =>
   GAME_SCHEDULE.filter((game) => {
     if (game.isDome) return false
-    const weather = weatherList.find((item) => item.name === game.city)
+    const weather = weatherList.find((item) => item.gameId === game.id)
     return Boolean(weather && (weather.status === '비' || weather.status === '흐림'))
   }).length

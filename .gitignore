@@ -16,3 +16,8 @@ npm-debug.log*
 
 # vite
 *.timestamp-*-*.mjs
+
+# local secrets
+.env
+.env.local
+.env.*.local
