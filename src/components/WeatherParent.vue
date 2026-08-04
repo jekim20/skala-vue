@@ -154,7 +154,7 @@ const statusFilter = ref('전체')
 // 검색어 + 상태 칩 + 정렬을 모두 반영한 최종 목록 (computed 파생)
 const visibleWeatherList = computed(() => {
   const keyword = searchQuery.value.trim()
-  let list = weatherList.value.filter((item) => item.name.includes(keyword))
+  let list = savedSearchCities.value.filter((item) => item.name.includes(keyword))
   if (statusFilter.value !== '전체') {
     list = list.filter((item) => item.status === statusFilter.value)
   }
@@ -264,7 +264,7 @@ const selectGame = (game) => {
       <template #extra>
         <UnitToggle />
       </template>
-      <WeatherStats :city-list="weatherList" />
+      <WeatherStats :city-list="savedSearchCities" />
     </BaseDashboardCard>
 
     <BaseDashboardCard :title="isStaticDemo ? '🔍 도시 날씨 검색' : '🔍 실시간 도시 날씨 검색'">
@@ -348,7 +348,7 @@ const selectGame = (game) => {
 
       <!-- 일치하는 데이터가 없을 때 안내 -->
       <div v-else class="empty-result">
-        🔍 조건과 일치하는 도시가 없습니다.
+        🔍 저장된 도시가 없습니다. 위에서 도시를 검색하거나 현재 위치 날씨를 저장해 주세요.
         <span v-if="searchQuery">(검색어: "{{ searchQuery }}")</span>
         <span v-if="statusFilter !== '전체'">(필터: {{ statusFilter }})</span>
       </div>
