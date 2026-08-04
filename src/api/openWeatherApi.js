@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { mockCities, mockStadiums } from '../data/mockWeather.js'
 
-const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
+const apiKey = 'ca766084a981e2cccb49ee2a64870159'
 const currentWeather = axios.create({ baseURL: 'https://api.openweathermap.org/data/2.5', timeout: 8000 })
 const geocoding = axios.create({ baseURL: 'https://api.openweathermap.org/geo/1.0', timeout: 8000 })
 
