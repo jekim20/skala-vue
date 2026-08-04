@@ -5,8 +5,6 @@
       <nav>
         <RouterLink to="/">홈</RouterLink>
         <RouterLink to="/about">서비스 소개</RouterLink>
-        <RouterLink v-if="!isStaticDemo" to="/mock-api">Mock API</RouterLink>
-        <RouterLink v-if="!isStaticDemo" to="/login">JWT 실습</RouterLink>
       </nav>
     </header>
     <main>
@@ -18,10 +16,6 @@
     </footer>
   </div>
 </template>
-
-<script setup>
-const isStaticDemo = import.meta.env.PROD
-</script>
 
 <style scoped>
 header {
