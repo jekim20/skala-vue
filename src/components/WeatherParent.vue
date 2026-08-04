@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, watchEffect, provide } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseDashboardCard from './BaseDashboardCard.vue'
 import SearchBar from './SearchBar.vue'
 import WeatherCard from './WeatherCard.vue'
@@ -10,10 +11,6 @@ import UnitToggle from './UnitToggle.vue'
 // 추가 코드: 지도 컴포넌트
 // ========================================
 import CityMap from './CityMap.vue'
-// ========================================
-// !! [협업 과제] 상세보기 모달 컴포넌트 (alert 대체)
-// ========================================
-import WeatherDetailModal from './WeatherDetailModal.vue'
 // ⚾ [추가] 야구 경기 예보 컴포넌트 · 유틸
 import BaseballPanel from './BaseballPanel.vue'
 import { countRainOutRisk } from '../utils/baseball'
@@ -128,18 +125,10 @@ const selectFromSearch = (cityItem) => {
 // 추가 코드 끝
 // ========================================
 
-// ========================================
-// !! [협업 과제] 상세보기: 기존 window.alert를 날씨 애니메이션 모달로 대체
-// detailCity가 있으면 모달 표시, 모달의 close 이벤트로 닫는다.
-// ========================================
-const detailCity = ref(null)
+const router = useRouter()
 
 const showDetail = (cityItem) => {
-  detailCity.value = cityItem
-}
-
-const closeDetail = () => {
-  detailCity.value = null
+  router.push(`/weather/${cityItem.id}`)
 }
 
 const addCity = (payload) => {
@@ -271,11 +260,6 @@ const selectGame = (game) => {
       <BaseballPanel :weather-list="weatherList" @select-game="selectGame" />
     </BaseDashboardCard>
 
-    <!-- ========================================
-         !! [협업 과제] 상세보기 모달 — provide('weather-unit')를 주입받아
-         카드와 동일한 단위로 표시된다. (Teleport로 body에 렌더링됨)
-         ======================================== -->
-    <WeatherDetailModal v-if="detailCity" :city-item="detailCity" @close="closeDetail" />
   </div>
 </template>
 
