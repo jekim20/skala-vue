@@ -3,7 +3,7 @@
 강의 p.156(4장 Vue Component)까지의 누적 요구사항만으로 구성한 독립 실습 결과물입니다.
 이후 학습 내용인 Router, Pinia, Axios와 로컬 Mock API까지 단계적으로 통합했습니다.
 
-> 🌐 **배포(GitHub Pages)**: https://jekim20.github.io/0803_skala_vue/
+> 🌐 **배포(GitHub Pages)**: https://jekim20.github.io/skala-vue/
 
 ## 실행
 
@@ -75,6 +75,6 @@ npm run dev:all
 ## 배포 방법
 
 ```bash
-npm run build          # vite.config.js의 base: '/0803_skala_vue/' 적용
+npm run build          # vite.config.js의 base: '/skala-vue/' 적용
 # dist/ 를 gh-pages 브랜치로 push → GitHub Pages가 자동 서빙
 ```
