@@ -42,6 +42,7 @@ Mock 데이터는 전국 18개 도시로 확장했습니다.
 | 윤성 | 날씨 상태별 애니메이션 상세 모달(Teleport/Transition), 눈(❄️) 테마 | WeatherDetailModal, WeatherCard |
 | 민기 | KBO 경기 · 우천 취소 예보(경기 카드, 위험 필터, 요약 배지) | BaseballPanel, GameCard, utils/baseball |
 | 서현 | 기온 분포 온도계 시각화(동적 눈금, 최저/평균/최고, 상승 애니메이션) | WeatherStats |
+| 소영 | 도시별 상세화면 디자인 (자외선 지수, 사용자 추천 행동 표시) | WeatherCard |
 
 `src_팀원명/` 폴더는 각 팀원의 병합 전 원본 전달분이며, 실제 동작 코드는 `src/`에 통합되어 있습니다.
 
