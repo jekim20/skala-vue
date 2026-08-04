@@ -7,7 +7,10 @@
 
 body {
   min-height: 100vh;
-  background: linear-gradient(160deg, #f5f7fa 0%, #e4ebf5 100%);
+  background:
+    radial-gradient(circle at 8% 4%, rgba(91, 210, 170, .17), transparent 28%),
+    radial-gradient(circle at 92% 12%, rgba(91, 156, 210, .16), transparent 26%),
+    linear-gradient(160deg, #f8fbfc 0%, #eaf0f6 100%);
   color: #2c3e50;
   line-height: 1.6;
   font-family:
@@ -22,7 +25,15 @@ body {
 }
 
 #app {
-  max-width: 860px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 24px;
+}
+
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { background: #bdebd9; color: #163f35; }
+
+@media (max-width: 640px) {
+  #app { padding: 14px; }
 }

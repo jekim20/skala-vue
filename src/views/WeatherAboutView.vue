@@ -1,24 +1,58 @@
+<script setup>
+const features = [
+  { icon: '🌤️', title: '날씨 대시보드', text: '전국 18개 도시의 기온과 날씨를 카드·통계·지도에서 한눈에 확인합니다.', tags: ['Computed', 'Props', 'Emit'] },
+  { icon: '🧭', title: 'Router 탐색', text: '홈과 도시 상세 화면을 자연스럽게 오가며 Hash Router로 Pages 새로고침도 지원합니다.', tags: ['Vue Router', 'Guard', 'Lazy Load'] },
+  { icon: '🌡️', title: 'Pinia 설정 Store', text: '섭씨와 화씨 설정을 Store에서 관리해 메인과 상세 화면이 같은 단위를 공유합니다.', tags: ['Pinia', 'Getter', 'Action'] },
+  { icon: '⚾', title: 'KBO 우천 예보', text: '구장별 날씨를 경기 일정과 결합해 우천 취소 위험과 직관 팁을 제공합니다.', tags: ['Data Mapping', 'Filter', 'UX'] },
+  { icon: '🧪', title: 'Mock API Lab', text: '로컬 환경에서 상품·게시글 CRUD와 로딩·오류·응답 흐름을 연습할 수 있습니다.', tags: ['Axios', 'CRUD', 'Node'] },
+  { icon: '🔐', title: 'JWT Login Lab', text: '테스트 계정으로 로그인하고 Pinia 인증 상태와 Router Guard 흐름을 확인합니다.', tags: ['JWT', 'Session', 'Interceptor'] },
+]
+</script>
+
 <template>
-  <section class="view-about">
-    <h1>서비스 소개</h1>
-    <p>이 앱은 Vue 3와 Vite 기반으로 만든 날씨 대시보드 예제입니다.</p>
-    <p>홈 화면에서 도시별 날씨 카드, 검색, 필터, 단위 변환을 사용해 보세요.</p>
-    <p>카드의 상세보기 버튼을 누르면 해당 지역 기상 상세 페이지로 이동합니다.</p>
-    <router-link to="/" class="back-link">메인 대시보드로 돌아가기</router-link>
+  <section class="about-page">
+    <div class="about-hero">
+      <div class="hero-copy">
+        <span class="eyebrow">SKALA · VUE FRONTEND PROJECT</span>
+        <h1>날씨를 탐색하며<br><em>Vue의 흐름</em>을 익힙니다.</h1>
+        <p>컴포넌트 통신에서 Router, Pinia, Axios까지 단계별 학습 내용을 하나의 대시보드 경험으로 연결했습니다.</p>
+        <div class="hero-actions">
+          <RouterLink class="primary-link" to="/">대시보드 체험하기 <span>→</span></RouterLink>
+          <a class="ghost-link" href="https://github.com/jekim20/0803_skala_vue" target="_blank" rel="noopener">GitHub 보기 ↗</a>
+        </div>
+      </div>
+      <div class="weather-orbit" aria-hidden="true">
+        <div class="sun">☀️</div><span class="cloud one">☁️</span><span class="cloud two">🌧️</span>
+        <div class="orbit-label"><strong>18</strong><span>도시 날씨</span></div>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <div><span>WHAT I BUILT</span><h2>하나의 화면에 담은 학습 기능</h2></div>
+      <p>각 기능은 독립된 컴포넌트로 나뉘고 반응형 상태로 연결됩니다.</p>
+    </div>
+
+    <div class="feature-grid">
+      <article v-for="feature in features" :key="feature.title" class="feature-card">
+        <span class="feature-icon">{{ feature.icon }}</span>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.text }}</p>
+        <div class="tag-list"><span v-for="tag in feature.tags" :key="tag">{{ tag }}</span></div>
+      </article>
+    </div>
+
+    <div class="architecture">
+      <div><span class="eyebrow dark">HOW IT WORKS</span><h2>사용자 행동이 화면이 되기까지</h2></div>
+      <ol>
+        <li><b>01</b><span><strong>Interaction</strong><small>검색·선택·단위 변경</small></span></li>
+        <li><b>02</b><span><strong>Reactive State</strong><small>ref · computed · Pinia</small></span></li>
+        <li><b>03</b><span><strong>Components</strong><small>Props · Emit · Slot</small></span></li>
+        <li><b>04</b><span><strong>Dashboard</strong><small>카드 · 지도 · 상세 화면</small></span></li>
+      </ol>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.view-about {
-  padding: 20px;
-}
-.back-link {
-  display: inline-block;
-  margin-top: 16px;
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: #42b883;
-  color: white;
-  text-decoration: none;
-}
+.about-page{color:#19364a}.about-hero{position:relative;display:grid;grid-template-columns:1.35fr .65fr;gap:30px;overflow:hidden;padding:58px;border-radius:28px;background:linear-gradient(135deg,#102c43 0%,#125a62 58%,#16806c 100%);color:white;box-shadow:0 24px 60px rgba(14,58,70,.22)}.about-hero:before{position:absolute;inset:auto -70px -120px auto;width:330px;height:330px;border:1px solid #ffffff20;border-radius:50%;content:''}.hero-copy{position:relative;z-index:1}.eyebrow{color:#88e3cc;font-size:.72rem;font-weight:800;letter-spacing:.18em}.eyebrow.dark{color:#24856d}.hero-copy h1{margin:14px 0;font-size:clamp(2.15rem,5vw,3.7rem);line-height:1.12;letter-spacing:-.055em}.hero-copy h1 em{color:#8ce6cc;font-style:normal}.hero-copy p{max-width:650px;color:#d6e8e8;font-size:1.02rem}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.primary-link,.ghost-link{padding:12px 18px;border-radius:11px;font-weight:750;text-decoration:none}.primary-link{background:#fff;color:#126c5b}.primary-link span{margin-left:7px}.ghost-link{border:1px solid #ffffff45;color:#fff}.weather-orbit{position:relative;align-self:center;justify-self:center;width:220px;height:220px;border:1px solid #ffffff35;border-radius:50%}.weather-orbit:after{position:absolute;inset:30px;border:1px dashed #ffffff28;border-radius:50%;content:''}.sun{position:absolute;top:27px;left:73px;font-size:4.8rem;filter:drop-shadow(0 8px 15px #f8b93d55)}.cloud{position:absolute;font-size:2.4rem;filter:drop-shadow(0 5px 8px #102c4355)}.cloud.one{right:-8px;top:92px}.cloud.two{bottom:5px;left:12px}.orbit-label{position:absolute;z-index:2;right:43px;bottom:45px;display:grid;text-align:center}.orbit-label strong{font-size:1.7rem}.orbit-label span{color:#c8e6e0;font-size:.72rem}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:44px 4px 20px}.section-heading span{color:#24856d;font-size:.7rem;font-weight:800;letter-spacing:.16em}.section-heading h2{margin-top:5px;font-size:1.7rem}.section-heading p{max-width:360px;color:#708493;font-size:.9rem}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.feature-card{position:relative;min-height:220px;padding:24px;border:1px solid #dbe7eb;border-radius:18px;background:rgba(255,255,255,.82);box-shadow:0 10px 32px rgba(34,69,87,.07);transition:.22s ease}.feature-card:hover{transform:translateY(-5px);border-color:#9ed8c6;box-shadow:0 16px 35px rgba(34,100,87,.12)}.feature-icon{display:grid;width:48px;height:48px;place-items:center;border-radius:14px;background:#eef8f5;font-size:1.55rem}.feature-card h3{margin:16px 0 7px}.feature-card p{color:#687d8b;font-size:.88rem}.tag-list{display:flex;gap:5px;flex-wrap:wrap;margin-top:15px}.tag-list span{padding:3px 7px;border-radius:7px;background:#f0f4f6;color:#547080;font-size:.66rem;font-weight:700}.architecture{display:grid;grid-template-columns:.7fr 1.3fr;gap:30px;margin-top:30px;padding:32px;border:1px solid #d9e5e9;border-radius:22px;background:#fff}.architecture h2{margin-top:8px;line-height:1.3}.architecture ol{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0;list-style:none}.architecture li{display:grid;gap:12px;padding:14px;border-radius:13px;background:#f4f8f8}.architecture li b{color:#39a486;font-size:.75rem}.architecture li span{display:grid}.architecture small{margin-top:3px;color:#81909a}@media(max-width:850px){.about-hero{grid-template-columns:1fr;padding:38px}.weather-orbit{display:none}.feature-grid{grid-template-columns:repeat(2,1fr)}.architecture{grid-template-columns:1fr}.section-heading{align-items:start;flex-direction:column}}@media(max-width:560px){.about-hero{padding:30px 24px}.feature-grid{grid-template-columns:1fr}.architecture ol{grid-template-columns:1fr 1fr}.section-heading p{display:none}}
 </style>
