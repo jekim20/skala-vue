@@ -62,7 +62,18 @@ export const publicWeatherApi = {
     }))
     return { stadiums, source: stadiums.every(({ source }) => source === 'openweather') ? 'openweather' : 'mock' }
   },
-  getCurrentLocation(lat, lng) {
-    return getAtLocation({ id: `current_${lat.toFixed(4)}_${lng.toFixed(4)}`, lat, lng })
+  async getCurrentLocation(lat, lng) {
+    let name = '현재 위치'
+
+    try {
+      const { data: locations } = await geocoding.get('/reverse', {
+        params: { lat, lon: lng, limit: 1, appid: apiKey },
+      })
+      name = locations[0]?.local_names?.ko || name
+    } catch {
+      // 역지오코딩에 실패해도 좌표 기반 날씨는 계속 표시한다.
+    }
+
+    return getAtLocation({ id: `current_${lat.toFixed(4)}_${lng.toFixed(4)}`, name, lat, lng })
   },
 }
