@@ -7,6 +7,7 @@ import SearchBar from './SearchBar.vue'
 import WeatherCard from './WeatherCard.vue'
 import WeatherStats from './WeatherStats.vue'
 import UnitToggle from './UnitToggle.vue'
+import MyLocationWeather from './MyLocationWeather.vue'
 import { useConfigStore } from '../stores/configStore.js'
 // ========================================
 // 추가 코드: 지도 컴포넌트
@@ -199,6 +200,21 @@ const selectFromSearch = (cityItem) => {
   searchQuery.value = cityItem.name
   selectCity(cityItem)
 }
+
+const saveLocationWeather = (city) => {
+  const savedCity = { ...city, isSaved: true }
+  const weatherIndex = weatherList.value.findIndex((item) => item.id === savedCity.id)
+  if (weatherIndex >= 0) weatherList.value.splice(weatherIndex, 1, savedCity)
+  else weatherList.value.push(savedCity)
+  const savedIndex = savedSearchCities.value.findIndex((item) => item.id === savedCity.id)
+  if (savedIndex >= 0) savedSearchCities.value.splice(savedIndex, 1, savedCity)
+  else savedSearchCities.value.push(savedCity)
+  writeSavedCities(savedSearchCities.value)
+  selectCity(savedCity)
+  searchQuery.value = ''
+  statusFilter.value = '전체'
+  selectedCityInfo.value = `💾 ${savedCity.name}의 현재 위치 날씨를 저장했습니다.`
+}
 // ========================================
 // 추가 코드 끝
 // ========================================
@@ -273,6 +289,10 @@ const selectGame = (game) => {
         {{ weatherSource === 'openweather' ? '● OpenWeather 실시간 데이터' : '● 포트폴리오 데모 데이터' }}
       </p>
       <p v-if="weatherError" class="api-error">{{ weatherError }}</p>
+    </BaseDashboardCard>
+
+    <BaseDashboardCard title="📍 내 위치 맞춤 날씨">
+      <MyLocationWeather @save-city="saveLocationWeather" />
     </BaseDashboardCard>
 
     <!-- ========================================

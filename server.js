@@ -101,7 +101,9 @@ async function fetchWeather(city) {
     const data = await response.json()
     return {
       ...city,
+      name: city.name === '현재 위치' ? data.name || city.name : city.name,
       temp: Math.round(data.main.temp),
+      feelsLike: Math.round(data.main.feels_like),
       status: weatherStatus(data.weather[0]?.id),
       humidity: data.main.humidity,
       wind: data.wind.speed,
@@ -155,6 +157,14 @@ async function route(req, res, url) {
       stadiums,
       source: stadiums.every(({ source }) => source === 'openweather') ? 'openweather' : 'mock',
     })
+  }
+  if (req.method === 'GET' && url.pathname === '/api/weather-location') {
+    const lat = Number(url.searchParams.get('lat'))
+    const lng = Number(url.searchParams.get('lng'))
+    if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lng) || lng < -180 || lng > 180) {
+      fail(400, '올바른 위도와 경도가 필요합니다.')
+    }
+    return send(res, 200, await fetchWeather({ id: `current_${lat}_${lng}`, name: '현재 위치', lat, lng, temp: 24, status: '맑음' }))
   }
   if (req.method === 'GET' && url.pathname === '/api/weather-search') {
     const query = (url.searchParams.get('q') || '').trim()

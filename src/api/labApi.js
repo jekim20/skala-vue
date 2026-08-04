@@ -53,4 +53,12 @@ export const weatherApi = {
       ? publicWeatherApi.getStadiums()
       : Promise.resolve({ stadiums: cloneMock(mockStadiums), source: 'mock' })
     : http.get('/stadium-weather').then(({ data }) => data),
+  getCurrentLocation: (lat, lng) => {
+    if (staticDemo) {
+      return hasPublicWeatherKey
+        ? publicWeatherApi.getCurrentLocation(lat, lng)
+        : Promise.reject(new Error('배포용 OpenWeather API 키가 필요합니다.'))
+    }
+    return http.get('/weather-location', { params: { lat, lng } }).then(({ data }) => data)
+  },
 }

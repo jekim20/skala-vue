@@ -19,7 +19,9 @@ async function getAtLocation(location) {
   })
   return {
     ...location,
+    name: location.name || data.name || '현재 위치',
     temp: Math.round(data.main.temp),
+    feelsLike: Math.round(data.main.feels_like),
     status: statusFromId(data.weather[0]?.id),
     humidity: data.main.humidity,
     wind: data.wind.speed,
@@ -59,5 +61,8 @@ export const publicWeatherApi = {
       try { return await getAtLocation(stadium) } catch { return { ...structuredClone(stadium), source: 'mock' } }
     }))
     return { stadiums, source: stadiums.every(({ source }) => source === 'openweather') ? 'openweather' : 'mock' }
+  },
+  getCurrentLocation(lat, lng) {
+    return getAtLocation({ id: `current_${lat.toFixed(4)}_${lng.toFixed(4)}`, lat, lng })
   },
 }
